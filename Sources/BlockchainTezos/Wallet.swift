@@ -11,10 +11,10 @@ import BeaconCore
 
 extension Tezos {
     
-    struct Wallet: BlockchainWallet {
+    public struct Wallet: BlockchainWallet {
         private let crypto: Crypto
         
-        init(crypto: Crypto) {
+        public init(crypto: Crypto) {
             self.crypto = crypto
         }
         

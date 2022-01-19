@@ -27,6 +27,7 @@ extension Beacon {
             let secureStorage = configuration.secureStorage ?? UserDefaultsSecureStorage()
             
             Beacon.initialize(
+                appType: .wallet,
                 appName: configuration.name,
                 appIcon: configuration.iconURL,
                 appURL: configuration.appURL,
@@ -41,7 +42,7 @@ extension Beacon {
                         name: beacon.app.name,
                         beaconID: beacon.beaconID,
                         storageManager: beacon.dependencyRegistry.storageManager,
-                        connectionController: try beacon.dependencyRegistry.connectionController(configuredWith: configuration.connections),
+                        connectionController: try beacon.dependencyRegistry.connectionController(configuredWith: configuration.connections, app: beacon.app),
                         messageController: beacon.dependencyRegistry.messageController,
                         crypto: beacon.dependencyRegistry.crypto
                     )
@@ -272,5 +273,157 @@ extension Beacon {
                 self.secureStorage = secureStorage
             }
         }
+    }
+}
+
+extension Beacon {
+
+    /// Asynchronous client that comunicates with Wallets.
+    public class DAppClient: Client {
+
+        // MARK: Initialization
+
+        ///
+        /// Asynchronously creates a new instance of `Beacon.DAppClient`.
+        ///
+        /// - Parameter configuration: A group of required and optional values used to create the client.
+        /// - Parameter completion: The closure invoked when the instance has been created.
+        /// - Parameter result: The created instance if the call was succesful or `Beacon.Error` otherwise.
+        ///
+        public static func create(with configuration: Configuration, completion: @escaping (_ result: Result<DAppClient, Error>) -> ()) {
+            let storage = configuration.storage ?? UserDefaultsStorage(userDefaults: .init(suiteName: "DappClient")!)
+            let secureStorage = configuration.secureStorage ?? UserDefaultsSecureStorage()
+
+            Beacon.initialize(
+                appType: .dapp,
+                appName: configuration.name,
+                appIcon: configuration.iconURL,
+                appURL: configuration.appURL,
+                blockchainFactories: configuration.blockchains,
+                storage: storage,
+                secureStorage: secureStorage
+            ) { result in
+                guard let beacon = result.get(ifFailure: completion) else { return }
+
+                do {
+                    let client = DAppClient(
+                        name: beacon.app.name,
+                        beaconID: beacon.beaconID,
+                        storageManager: beacon.dependencyRegistry.storageManager,
+                        connectionController: try beacon.dependencyRegistry.connectionController(configuredWith: configuration.connections, app: beacon.app),
+                        messageController: beacon.dependencyRegistry.messageController,
+                        crypto: beacon.dependencyRegistry.crypto
+                    )
+
+                    completion(.success(client))
+                } catch {
+                    completion(.failure(Error(error)))
+                }
+            }
+        }
+
+
+        // MARK: Connection
+
+        ///
+        /// Listens for incoming messages.
+        ///
+        /// - Parameter listener: The closure called whenever a new request arrives.
+        /// - Parameter result: A result representing the incoming request, either `BeaconRequest<T>` or `Beacon.Error` if message processing failed.
+        ///
+        public func listen<T: Blockchain>(onResponse listener: @escaping (_ result: Result<BeaconResponse<T>, Error>) -> ()) {
+            connectionController.listen { [weak self] (result: Result<BeaconConnectionMessage, Swift.Error>) in
+                guard let connectionMessage = result.get(ifFailure: listener) else { return }
+                self?.messageController.onIncoming(connectionMessage.content, with: connectionMessage.origin) { (result: Result<BeaconMessage<T>, Swift.Error>) in
+                    guard let beaconMessage = result.get(ifFailure: listener) else { return }
+                    switch beaconMessage {
+                    case let .disconnect(disconnect):
+                        self?.removePeer(withPublicKey: disconnect.origin.id) { _ in }
+
+                    case let .response(response):
+                        listener(.success(response))
+
+                    default:
+                        /* ignore other messages */
+                        break
+                    }
+                }
+            }
+        }
+
+        private func acknowledge<T: Blockchain>(_ request: BeaconRequest<T>, completion: @escaping (Result<(), Error>) -> ()) {
+            let message = AcknowledgeBeaconResponse(from: request)
+            send(BeaconMessage<T>.response(.acknowledge(message)), terminalMessage: false, completion: completion)
+        }
+
+        public func request<T: Blockchain>(with request: BeaconRequest<T>, completion: @escaping (_ result: Result<(), Error>) -> ()) {
+            send(.request(request), terminalMessage: true, completion: completion)
+        }
+
+        public func getOwnAppMetadata(completion: @escaping (Result<AppMetadata, Error>) -> ()) {
+            messageController.senderIdentifier(publicKey: beaconID) { [weak self] result in
+                guard let senderID = result.get(ifFailure: completion) else { return }
+
+                completion(.success(AppMetadata(senderID: senderID, name: self?.name ?? "", icon: nil)))
+
+            }
+        }
+
+        // MARK: Types
+
+        /// A group of the `Beacon.DAppClient` configuration values.
+        public struct Configuration {
+
+            /// The name of the application.
+            public let name: String
+
+            /// A URL to the application's webpage.
+            public let appURL: String?
+
+            /// A URL to the application's icon.
+            public let iconURL: String?
+
+            /// Blockchains that will be supported by the configured client.
+            public let blockchains: [BlockchainFactory]
+
+            /// Connection types that will be supported by the configured client.
+            public let connections: [Beacon.Connection]
+
+            /// An optional external implementation of `Storage`.
+            public let storage: Storage?
+
+            /// An optional external implementation of `SecureStorage`.
+            public let secureStorage: SecureStorage?
+
+            ///
+            /// Creates a new configuration from the given application name and supported connections.
+            ///
+            /// - Parameter name: The name of the application.
+            /// - Parameter appURL: A URL to the application's webpage.
+            /// - Parameter iconURL: A URL to the application's icon.
+            /// - Parameter blockchains: Supported blockchains.
+            /// - Parameter connections: Supported connection types.
+            /// - Parameter storage: An optional storage to preserve Beacon state, if not provided, an internal implementation will be used.
+            /// - Parameter secureStorage: An optional storage to preserve sensitive Beacon state,  if not provided, an internal implementation will be used.
+            ///
+            public init(
+                name: String,
+                appURL: String? = nil,
+                iconURL: String? = nil,
+                blockchains: [BlockchainFactory],
+                connections: [Beacon.Connection],
+                storage: Storage? = nil,
+                secureStorage: SecureStorage? = nil
+            ) {
+                self.name = name
+                self.appURL = appURL
+                self.iconURL = iconURL
+                self.blockchains = blockchains
+                self.connections = connections
+                self.storage = storage
+                self.secureStorage = secureStorage
+            }
+        }
+
     }
 }

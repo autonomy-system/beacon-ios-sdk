@@ -150,7 +150,11 @@ public class Transport {
     func send(_ message: ConnectionMessage, completion: @escaping (Result<(), Swift.Error>) -> ()) {
         wrapped.send(message, completion: completion)
     }
-    
+
+    func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Swift.Error>) -> ()) {
+        wrapped.startOpenChannelListener(completion: completion)
+    }
+
     // MARK: Subscription
     
     final func add(_ listener: Listener) {
@@ -194,9 +198,10 @@ protocol TransportProtocol {
     func stop(completion: @escaping (Result<(), Swift.Error>) -> ())
     func pause(completion: @escaping (Result<(), Swift.Error>) -> ())
     func resume(completion: @escaping (Result<(), Swift.Error>) -> ())
-    
+
     func connect(new peers: [Beacon.Peer], completion: @escaping (Result<[Beacon.Peer], Swift.Error>) -> ())
     func disconnect(from peers: [Beacon.Peer], completion: @escaping (Result<[Beacon.Peer], Swift.Error>) -> ())
     
     func send(_ message: ConnectionMessage, completion: @escaping (Result<(), Swift.Error>) -> ())
+    func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Swift.Error>) -> ())
 }

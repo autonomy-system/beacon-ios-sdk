@@ -56,7 +56,7 @@ public class Crypto {
         
         return try cryptoProvider.ed25519KeyPair(from: hash)
     }
-    
+
     public func serverSessionKeyPair(publicKey: [UInt8], secretKey: [UInt8]) throws -> SessionKeyPair {
         let serverPublicKey = try cryptoProvider.convertToCurve25519(ed25519PublicKey: secretKey[32..<64])
         let serverSecretKey = try cryptoProvider.convertToCurve25519(ed25519SecretKey: secretKey)
@@ -117,6 +117,13 @@ public class Crypto {
     
     public func encrypt(message: [UInt8], withSharedKey key: [UInt8]) throws -> [UInt8] {
         try cryptoProvider.encrypt(message: message, withSharedKey: key)
+    }
+
+    public func decrypt(message: HexString, publicKey: [UInt8], secretKey: [UInt8]) throws -> [UInt8] {
+        let kxSelfPrivateKey = try cryptoProvider.convertToCurve25519(ed25519SecretKey: secretKey)
+        let kxSelfPublicKey = try cryptoProvider.convertToCurve25519(ed25519PublicKey: publicKey)
+
+        return try cryptoProvider.decrypt(message: try message.asBytes(), publicKey: kxSelfPublicKey, secretKey: kxSelfPrivateKey)
     }
     
     public func decrypt(message: String, withSharedKey key: [UInt8]) throws -> [UInt8] {

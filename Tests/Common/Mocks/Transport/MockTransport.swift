@@ -123,5 +123,10 @@ public class MockTransport: Transport {
             mock.sendMessageCalls.append(message)
             completion(.success(()))
         }
+
+        public func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ()) {
+            // TODO:
+            completion(.failure(Beacon.Error.unknown))
+        }
     }
 }

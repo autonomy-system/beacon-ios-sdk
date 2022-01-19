@@ -17,38 +17,18 @@ class P2PMatrixDependencyRegistry: ExtendedDependencyRegistry {
     
     // MARK: P2P
     
-    func p2pMatrixCommunicator() throws -> Transport.P2P.Matrix.Communicator {
-        try weakP2PMatrixCommunicator.value()
+    func p2pMatrixCommunicator(app: Beacon.Application) throws -> Transport.P2P.Matrix.Communicator {
+        Transport.P2P.Matrix.Communicator(app: app, crypto: self.crypto)
     }
     
-    private lazy var weakP2PMatrixCommunicator: ThrowingLazyWeakReference<Transport.P2P.Matrix.Communicator> = ThrowingLazyWeakReference { [unowned self] in
-        guard let beacon = Beacon.shared else {
-            throw Beacon.Error.unknown
-        }
-        
-        return Transport.P2P.Matrix.Communicator(app: beacon.app, crypto: self.crypto)
+    func p2pMatrixSecurity(app: Beacon.Application) throws -> Transport.P2P.Matrix.Security {
+        Transport.P2P.Matrix.Security(app: app, crypto: self.crypto, time: self.time)
     }
     
-    func p2pMatrixSecurity() throws -> Transport.P2P.Matrix.Security {
-        try weakP2PMatrixSecurity.value()
-    }
-    
-    private lazy var weakP2PMatrixSecurity: ThrowingLazyWeakReference<Transport.P2P.Matrix.Security> = ThrowingLazyWeakReference { [unowned self] in
-        guard let beacon = Beacon.shared else {
-            throw Beacon.Error.unknown
-        }
-        
-        return Transport.P2P.Matrix.Security(app: beacon.app, crypto: self.crypto, time: self.time)
-    }
-    
-    func p2pMatrixStore(urlSession: URLSession, matrixNodes: [String]) throws -> Transport.P2P.Matrix.Store {
-        guard let beacon = Beacon.shared else {
-            throw Beacon.Error.unknown
-        }
-        
-        return Transport.P2P.Matrix.Store(
-            app: beacon.app,
-            communicator: try p2pMatrixCommunicator(),
+    func p2pMatrixStore(app: Beacon.Application, communicator: Transport.P2P.Matrix.Communicator, urlSession: URLSession, matrixNodes: [String]) throws -> Transport.P2P.Matrix.Store {
+        Transport.P2P.Matrix.Store(
+            app: app,
+            communicator: communicator,
             matrixClient: matrixClient(urlSession: urlSession),
             matrixNodes: matrixNodes,
             storageManager: storageManager,
@@ -75,14 +55,14 @@ class P2PMatrixDependencyRegistry: ExtendedDependencyRegistry {
     
     var storageManager: StorageManager { dependencyRegistry.storageManager }
     
-    func connectionController(configuredWith connections: [Beacon.Connection]) throws -> ConnectionControllerProtocol {
-        try dependencyRegistry.connectionController(configuredWith: connections)
+    func connectionController(configuredWith connections: [Beacon.Connection], app: Beacon.Application) throws -> ConnectionControllerProtocol {
+        try dependencyRegistry.connectionController(configuredWith: connections, app: app)
     }
     
     var messageController: MessageControllerProtocol { dependencyRegistry.messageController }
     
-    func transport(configuredWith connection: Beacon.Connection) throws -> Transport {
-        try dependencyRegistry.transport(configuredWith: connection)
+    func transport(configuredWith connection: Beacon.Connection, app: Beacon.Application) throws -> Transport {
+        try dependencyRegistry.transport(configuredWith: connection, app: app)
     }
     
     var blockchainRegistry: BlockchainRegistryProtocol { dependencyRegistry.blockchainRegistry }

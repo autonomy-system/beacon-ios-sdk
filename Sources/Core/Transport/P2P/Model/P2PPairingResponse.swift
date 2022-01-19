@@ -43,5 +43,18 @@ public extension Transport.P2P {
             case icon
             case appURL = "appUrl"
         }
+
+        public func extractP2PPeer() -> Beacon.P2PPeer {
+            Beacon.P2PPeer(
+                id: id,
+                name: name,
+                publicKey: publicKey,
+                relayServer: relayServer,
+                version: version,
+                icon: icon,
+                appURL: URL(string: appURL ?? "")
+            )
+
+        }
     }
 }

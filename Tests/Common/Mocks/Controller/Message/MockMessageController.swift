@@ -81,6 +81,10 @@ public class MockMessageController: MessageControllerProtocol {
             return (Beacon.Origin(kind: connectionKind, id: beaconID), versioned)
         }
     }
+
+    public func senderIdentifier(publicKey: String, completion: @escaping (Result<String, Error>) -> ()) {
+        // TODO
+    }
 }
 
 public typealias OnIncomingArguments = (VersionedBeaconMessage, Beacon.Origin)

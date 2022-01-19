@@ -169,6 +169,14 @@ class ConnectionController: ConnectionControllerProtocol {
             completion(.failure(error))
         }
     }
+
+    // MARK: - startOpenChannelListener
+    func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ()) {
+        transports.forEach { transport in
+            transport.startOpenChannelListener(completion: completion)
+        }
+    }
+
 }
 
 public protocol ConnectionControllerProtocol {
@@ -182,4 +190,5 @@ public protocol ConnectionControllerProtocol {
     
     func onNew(_ peers: [Beacon.Peer], completion: @escaping (Result<(), Error>) -> ())
     func onRemoved(_ peers: [Beacon.Peer], completion: @escaping (Result<(), Error>) -> ())
+    func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ())
 }

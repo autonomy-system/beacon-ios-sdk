@@ -38,11 +38,31 @@ public extension Transport {
                         completion(.failure(Beacon.Error.unknown))
                         return
                     }
-                    
+
                     selfStrong.connectWithKnownPeers(completion: completion)
                 }
             }
-            
+
+            func startOpenChannelListener(completion: @escaping (Result<(Beacon.Peer), Swift.Error>) -> ()) {
+                client.listenForChannelOpening { [weak self] (result) in
+                    guard let self = self,
+                          let p2pPeer = result.get(ifFailure: completion) else { return }
+
+                    let peer: Beacon.Peer = .p2p(p2pPeer)
+                    self.storageManager.add([peer]) { result in
+                        guard let _ = result.get(ifFailure: completion) else { return }
+
+                        do {
+                            try self.listen(to: p2pPeer)
+                            completion(.success(peer))
+
+                        } catch {
+                            completion(.failure(error))
+                        }
+                    }
+                }
+            }
+
             func stop(completion: @escaping (Result<(), Swift.Error>) -> ()) {
                 client.stop(completion: completion)
             }

@@ -21,13 +21,13 @@ public struct MockDependencyRegistry: DependencyRegistry {
     
     public var storageManager: StorageManager { coreDependencyRegistry.storageManager }
     
-    public func connectionController(configuredWith connections: [Beacon.Connection]) throws -> ConnectionControllerProtocol {
+    public func connectionController(configuredWith connections: [Beacon.Connection], app: Beacon.Application) throws -> ConnectionControllerProtocol {
         MockConnectionController()
     }
     
     public var messageController: MessageControllerProtocol { MockMessageController(storageManager: self.storageManager) }
     
-    public func transport(configuredWith connection: Beacon.Connection) throws -> Transport {
+    public func transport(configuredWith connection: Beacon.Connection, app: Beacon.Application) throws -> Transport {
         MockTransport(kind: connection.kind)
     }
     

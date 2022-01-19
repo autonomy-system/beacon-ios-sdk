@@ -83,4 +83,9 @@ public class MockConnectionController: ConnectionControllerProtocol {
     public func register(messages: [(Beacon.Origin, VersionedBeaconMessage)]) {
         self.messages.append(contentsOf: messages)
     }
+
+    public func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ()) {
+        // TODO:
+        completion(.failure(Beacon.Error.unknown))
+    }
 }

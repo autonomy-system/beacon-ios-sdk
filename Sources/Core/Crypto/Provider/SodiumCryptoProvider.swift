@@ -37,7 +37,7 @@ class SodiumCryptoProvider: CryptoProvider {
     func ed25519KeyPair(from seed: [UInt8]) throws -> KeyPair {
         var pk = [UInt8](repeating: 0, count: crypto_sign_publickeybytes())
         var sk = [UInt8](repeating: 0, count: crypto_sign_secretkeybytes())
-        
+
         let status = crypto_sign_seed_keypair(&pk, &sk, seed)
         guard status == 0 else {
             throw Error.sodium(Int(status))
@@ -45,7 +45,7 @@ class SodiumCryptoProvider: CryptoProvider {
         
         return KeyPair(secretKey: sk, publicKey: pk)
     }
-    
+
     func convertToCurve25519(ed25519SecretKey key: [UInt8]) throws -> [UInt8] {
         var result = [UInt8](repeating: 0, count: crypto_scalarmult_curve25519_bytes())
         let status = crypto_sign_ed25519_sk_to_curve25519(&result, key)
@@ -121,7 +121,18 @@ class SodiumCryptoProvider: CryptoProvider {
         
         return result
     }
-    
+
+    func decrypt(message: [UInt8], publicKey: [UInt8], secretKey: [UInt8]) throws -> [UInt8] {
+        var result = [UInt8](repeating: 0, count: message.count)
+        let status = crypto_box_seal_open(&result, message, UInt64(message.count), publicKey, secretKey)
+
+        guard status == 0 else {
+            throw Error.sodium(Int(status))
+        }
+
+        return result.reversed().drop(while: { $0 == 0 }).reversed()
+    }
+
     func encrypt(message: [UInt8], withSharedKey key: [UInt8]) throws -> [UInt8] {
         let nonce = try randomBytes(length: crypto_box_noncebytes())
         var result = [UInt8](repeating: 0, count: message.count + crypto_box_macbytes())
