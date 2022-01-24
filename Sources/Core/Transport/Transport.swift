@@ -155,6 +155,10 @@ public class Transport {
         wrapped.startOpenChannelListener(completion: completion)
     }
 
+    func getRelayServers(completion: @escaping (Result<([String]), Error>) -> ()) {
+        wrapped.getRelayServers(completion: completion)
+    }
+
     // MARK: Subscription
     
     final func add(_ listener: Listener) {
@@ -204,4 +208,5 @@ protocol TransportProtocol {
     
     func send(_ message: ConnectionMessage, completion: @escaping (Result<(), Swift.Error>) -> ())
     func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Swift.Error>) -> ())
+    func getRelayServers(completion: @escaping (Result<([String]), Error>) -> ())
 }

@@ -130,6 +130,12 @@ public extension Transport.P2P {
 
         }
 
+        public func getRelayServers(completion: @escaping (Result<[String], Swift.Error>) -> ()) {
+            self.matrixClient.getPollerNodes { pollerNodes in
+                completion(.success(pollerNodes))
+            }
+        }
+
         ///
         /// Stops the connection.
         ///

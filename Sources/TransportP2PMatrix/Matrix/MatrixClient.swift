@@ -187,6 +187,11 @@ public class MatrixClient {
             }
         }
     }
+
+    func getPollerNodes(completion: @escaping ([String]) -> ()) {
+        let pollerKeys = Array(pollers.keys)
+        completion(pollerKeys)
+    }
     
     private func poll(on node: String, completion: @escaping (Result<(), Swift.Error>) -> ()) {
         var _completion: ((Result<(), Swift.Error>) -> ())? = completion

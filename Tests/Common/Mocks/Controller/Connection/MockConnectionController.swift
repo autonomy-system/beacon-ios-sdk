@@ -88,4 +88,8 @@ public class MockConnectionController: ConnectionControllerProtocol {
         // TODO:
         completion(.failure(Beacon.Error.unknown))
     }
+
+    public func getRelayServers(completion: @escaping (Result<([String]), Error>) -> ()) {
+        completion(.success(["beacon-node-1.sky.papers.tech"]))
+    }
 }

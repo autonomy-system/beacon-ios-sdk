@@ -16,7 +16,8 @@ public protocol P2PClient {
     func stop(completion: @escaping (Result<(), Swift.Error>) -> ())
     func pause(completion: @escaping (Result<(), Swift.Error>) -> ())
     func resume(completion: @escaping (Result<(), Swift.Error>) -> ())
-    func listenForChannelOpening(newPeerCompletion: @escaping (Result<Beacon.P2PPeer, Swift.Error>) -> ())
+    func listenForChannelOpening(newPeerCompletion: @escaping (Result<Beacon.P2PPeer, Error>) -> ())
+    func getRelayServers(completion: @escaping (Result<[String], Error>) -> ())
     
     // MARK: Incoming Messages
     

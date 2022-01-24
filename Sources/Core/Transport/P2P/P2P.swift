@@ -63,6 +63,10 @@ public extension Transport {
                 }
             }
 
+            func getRelayServers(completion: @escaping (Result<([String]), Swift.Error>) -> ()) {
+                client.getRelayServers(completion: completion)
+            }
+
             func stop(completion: @escaping (Result<(), Swift.Error>) -> ()) {
                 client.stop(completion: completion)
             }
