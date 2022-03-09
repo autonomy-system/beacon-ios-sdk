@@ -122,6 +122,46 @@ public class Beacon {
             completion(.failure(error))
         }
     }
+
+    public func openCryptoBox(payload: String, completion: @escaping (Result<[UInt8], Swift.Error>) -> ()) {
+        do {
+            let hexString = try HexString(from: payload)
+
+            let keyPair = app.keyPair
+            let decryptedMessage = try dependencyRegistry.crypto.decrypt(message: hexString, publicKey: keyPair.publicKey, secretKey: keyPair.secretKey)
+            completion(.success(decryptedMessage))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    public func sealCryptoBox(payload: String, publicKey: String, completion: @escaping (Result<String, Swift.Error>) -> ()) {
+        do {
+            let pubicKeyHex = try HexString(from: publicKey).asBytes()
+            let keyPair = app.keyPair
+            let sharedKey = try dependencyRegistry.crypto.clientSessionKeyPair(publicKey: pubicKeyHex, secretKey: keyPair.secretKey)
+
+            let encryptedData = try dependencyRegistry.crypto.encrypt(message: payload, withSharedKey: sharedKey.tx)
+            let hexString = HexString(from: encryptedData)
+            completion(.success(hexString.asString()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    public func openCryptoBox(payload: String, publicKey: String, completion: @escaping (Result<[UInt8], Swift.Error>) -> ()) {
+        do {
+            let publicKeyBytes = try HexString(from: publicKey).asBytes()
+            let keyPair = app.keyPair
+            let sharedKey = try dependencyRegistry.crypto.serverSessionKeyPair(publicKey: publicKeyBytes, secretKey: keyPair.secretKey)
+
+            let decryptedData = try dependencyRegistry.crypto.decrypt(message: HexString(from: payload), withSharedKey: sharedKey.rx)
+            completion(.success(decryptedData))
+
+        } catch {
+            completion(.failure(error))
+        }
+    }
 }
 
 // MARK: Extensions
