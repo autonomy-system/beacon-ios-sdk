@@ -114,17 +114,22 @@ class WalletClientTests: XCTestCase {
         connectionController.register(messages: versioned.map { (origin, $0) })
         
         var received: [BeaconRequest<MockBlockchain>] = []
-        beaconClient.listen { (result: Result<BeaconRequest<MockBlockchain>, Beacon.Error>) in
+        beaconClient.listen { (result: Result<BeaconMessage<MockBlockchain>, Beacon.Error>) in
             switch result {
-            case let .success(request):
-                received.append(request)
-                if received.count == versioned.count {
-                    XCTAssertTrue(
-                        versioned.map { ($0, origin) } == self.messageController.onIncomingCalls,
-                        "Expected messageController#onIncoming to be called with the specified versioned requests and origin"
-                    )
-                    XCTAssertEqual(requests, received, "Received requests don't match expected")
-                    testExpectation.fulfill()
+            case let .success(message):
+                switch (message) {
+                case let .request(request):
+                    received.append(request)
+                    if received.count == versioned.count {
+                        XCTAssertTrue(
+                            versioned.map { ($0, origin) } == self.messageController.onIncomingCalls,
+                            "Expected messageController#onIncoming to be called with the specified versioned requests and origin"
+                        )
+                        XCTAssertEqual(requests, received, "Received requests don't match expected")
+                        testExpectation.fulfill()
+                    }
+                default:
+                    break
                 }
             case let .failure(error):
                 XCTFail("Unexpected error: \(error)")
@@ -154,7 +159,7 @@ class WalletClientTests: XCTestCase {
         
         testExpectation.expectedFulfillmentCount = versioned.count
         
-        beaconClient.listen { (result: Result<BeaconRequest<MockBlockchain>, Beacon.Error>) in
+        beaconClient.listen { (result: Result<BeaconMessage<MockBlockchain>, Beacon.Error>) in
             switch result {
             case .success(_):
                 XCTFail("Expected error")

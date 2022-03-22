@@ -19,8 +19,8 @@ extension Beacon {
         
         public static let matrixMaxSyncRetries: Int = 3
         
-        public static let p2pJoinDelaysMs: Int = 200
-        public static let p2pMaxJoinRetries: Int = 10
+        public static let p2pJoinDelaysMs: Int = 100
+        public static let p2pMaxJoinRetries: Int = 5
         
         public static let defaultRelayServers: [String] = [
             "beacon-node-1.sky.papers.tech",
