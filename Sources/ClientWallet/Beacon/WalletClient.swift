@@ -62,15 +62,19 @@ extension Beacon {
         /// - Parameter listener: The closure called whenever a new request arrives.
         /// - Parameter result: A result representing the incoming request, either `BeaconRequest<T>` or `Beacon.Error` if message processing failed.
         ///
-        public func listen<T: Blockchain>(onRequest listener: @escaping (_ result: Result<BeaconRequest<T>, Error>) -> ()) {
+        public func listen<T: Blockchain>(
+            onRequest listener: @escaping (_ result: Result<BeaconMessage<T>, Error>) -> ()
+        ) {
             connectionController.listen { [weak self] (result: Result<BeaconConnectionMessage, Swift.Error>) in
                 guard let connectionMessage = result.get(ifFailure: listener) else { return }
                 self?.messageController.onIncoming(connectionMessage.content, with: connectionMessage.origin) { (result: Result<BeaconMessage<T>, Swift.Error>) in
                     guard let beaconMessage = result.get(ifFailure: listener) else { return }
                     switch beaconMessage {
                     case let .request(request):
-                        listener(.success(request))
+                        listener(.success(beaconMessage))
                         self?.acknowledge(request) { _ in }
+                    case let .response(_):
+                        listener(.success(beaconMessage))
                     case let .disconnect(disconnect):
                         self?.removePeer(withPublicKey: disconnect.origin.id) { _ in }
                     default:
@@ -103,6 +107,24 @@ extension Beacon {
                 completion(result.withBeaconError())
             }
         }
+        
+        public func request<T: Blockchain>(with request: BeaconRequest<T>, completion: @escaping (_ result: Result<(), Error>) -> ()) {
+            send(.request(request), terminalMessage: true, completion: completion)
+        }
+        
+        public func getOwnAppMetadata(completion: @escaping (Result<AppMetadata, Error>) -> ()) {
+            messageController.senderIdentifier(publicKey: beaconID) { [weak self] result in
+                guard let senderID = result.get(ifFailure: completion) else { return }
+                
+                completion(.success(AppMetadata(senderID: senderID, name: self?.name ?? "", icon: nil)))
+                
+            }
+        }
+        
+//        private func acknowledge<T: Blockchain>(_ request: BeaconRequest<T>, completion: @escaping (Result<(), Error>) -> ()) {
+//            let message = AcknowledgeBeaconResponse(from: request)
+//            send(BeaconMessage<T>.response(.acknowledge(message)), terminalMessage: false, completion: completion)
+//        }
         
         ///
         /// Returns the first app metadata that matches the specified `senderID`
