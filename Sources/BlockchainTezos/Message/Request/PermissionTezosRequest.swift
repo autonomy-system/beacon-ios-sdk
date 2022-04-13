@@ -39,7 +39,7 @@ public struct PermissionTezosRequest: PermissionBeaconRequestProtocol, Equatable
     /// The version of the message.
     public let version: String
     
-    init(
+    public init(
         type: String,
         id: String,
         blockchainIdentifier: String,

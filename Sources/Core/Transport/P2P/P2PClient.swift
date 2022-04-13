@@ -16,6 +16,8 @@ public protocol P2PClient {
     func stop(completion: @escaping (Result<(), Swift.Error>) -> ())
     func pause(completion: @escaping (Result<(), Swift.Error>) -> ())
     func resume(completion: @escaping (Result<(), Swift.Error>) -> ())
+    func listenForChannelOpening(newPeerCompletion: @escaping (Result<Beacon.P2PPeer, Error>) -> ())
+    func getRelayServers(completion: @escaping (Result<[String], Error>) -> ())
     
     // MARK: Incoming Messages
     
@@ -29,5 +31,5 @@ public protocol P2PClient {
 }
 
 public protocol P2PClientFactory {
-    func create(with dependencyRegistry: DependencyRegistry) throws -> P2PClient
+    func create(with dependencyRegistry: DependencyRegistry, app: Beacon.Application) throws -> P2PClient
 }

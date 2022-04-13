@@ -8,10 +8,6 @@
 import Foundation
 import BeaconCore
 
-extension StorageManager {
-    var p2pMatrixPlugin: P2PMatrixStoragePlugin? { plugins.first(where: { $0 is P2PMatrixStoragePlugin }) as? P2PMatrixStoragePlugin }
-}
-
 // MARK: ExtendedP2PMatrixStoragePlugin
 
 extension StorageManager: ExtendedP2PMatrixStoragePlugin {
@@ -22,6 +18,10 @@ extension StorageManager: ExtendedP2PMatrixStoragePlugin {
         }
         
         return plugin.extend()
+    }
+
+    public var p2pMatrixPlugin: P2PMatrixStoragePlugin? {
+        plugins.first(where: { $0 is P2PMatrixStoragePlugin }) as? P2PMatrixStoragePlugin
     }
     
     public func getMatrixRelayServer(completion: @escaping (Result<String?, Swift.Error>) -> ()) {

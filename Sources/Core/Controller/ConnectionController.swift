@@ -169,6 +169,22 @@ class ConnectionController: ConnectionControllerProtocol {
             completion(.failure(error))
         }
     }
+
+    // MARK: - startOpenChannelListener
+    func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ()) {
+        transports.forEach { transport in
+            transport.startOpenChannelListener(completion: completion)
+        }
+    }
+
+    func getRelayServers(completion: @escaping (Result<([String]), Swift.Error>) -> ()) {
+        transports.forEachAsync(body: { $0.getRelayServers(completion: $1)}) { relayServersResults in
+            let result = relayServersResults.compactMap { $0.get(ifFailure: completion) }
+                .reduce([], +)
+            completion(.success(result))
+        }
+    }
+
 }
 
 public protocol ConnectionControllerProtocol {
@@ -182,4 +198,6 @@ public protocol ConnectionControllerProtocol {
     
     func onNew(_ peers: [Beacon.Peer], completion: @escaping (Result<(), Error>) -> ())
     func onRemoved(_ peers: [Beacon.Peer], completion: @escaping (Result<(), Error>) -> ())
+    func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ())
+    func getRelayServers(completion: @escaping (Result<([String]), Swift.Error>) -> ())
 }

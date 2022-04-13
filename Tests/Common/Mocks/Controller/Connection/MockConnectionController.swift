@@ -83,4 +83,13 @@ public class MockConnectionController: ConnectionControllerProtocol {
     public func register(messages: [(Beacon.Origin, VersionedBeaconMessage)]) {
         self.messages.append(contentsOf: messages)
     }
+
+    public func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ()) {
+        // TODO:
+        completion(.failure(Beacon.Error.unknown))
+    }
+
+    public func getRelayServers(completion: @escaping (Result<([String]), Error>) -> ()) {
+        completion(.success(["beacon-node-1.sky.papers.tech"]))
+    }
 }

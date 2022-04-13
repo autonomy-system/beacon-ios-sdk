@@ -45,6 +45,10 @@ extension Transport.P2P.Matrix {
         func encryptPairingPayload(_ pairingPayload: String, with publicKey: [UInt8]) throws -> [UInt8] {
             try crypto.encrypt(message: pairingPayload, withPublicKey: publicKey)
         }
+
+        func decryptPairingPayload(_ encryptedPairingPayload: HexString) throws -> [UInt8] {
+            try crypto.decrypt(message: encryptedPairingPayload, publicKey: keyPair.publicKey, secretKey: keyPair.secretKey)
+        }
         
         func encrypt(message: String, with publicKey: [UInt8]) throws -> [UInt8] {
             let keyPair = try getOrCreateClientSessionKeyPair(for: publicKey)

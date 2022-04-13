@@ -8,7 +8,7 @@
 import Foundation
 
 class CoreDependencyRegistry: DependencyRegistry {
-    
+
     init(blockchainFactories: [BlockchainFactory], storage: Storage, secureStorage: SecureStorage) {
         self.blockchainFactories = blockchainFactories
         self.storage = storage
@@ -27,8 +27,8 @@ class CoreDependencyRegistry: DependencyRegistry {
     
     // MARK: Controller
     
-    public func connectionController(configuredWith connections: [Beacon.Connection]) throws -> ConnectionControllerProtocol {
-        let transports = try connections.map { try transport(configuredWith: $0) }
+    public func connectionController(configuredWith connections: [Beacon.Connection], app: Beacon.Application) throws -> ConnectionControllerProtocol {
+        let transports = try connections.map { try transport(configuredWith: $0, app: app) }
         return ConnectionController(transports: transports, serializer: serializer)
     }
     
@@ -44,10 +44,10 @@ class CoreDependencyRegistry: DependencyRegistry {
     
     // MARK: Transport
     
-    public func transport(configuredWith connection: Beacon.Connection) throws -> Transport {
+    public func transport(configuredWith connection: Beacon.Connection, app: Beacon.Application) throws -> Transport {
         switch connection {
         case let .p2p(configuration):
-            return Transport.P2P(client: try configuration.client.create(with: self), storageManager: self.storageManager)
+            return Transport.P2P(client: try configuration.client.create(with: self, app: app), storageManager: self.storageManager)
         }
     }
     

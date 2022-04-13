@@ -123,5 +123,14 @@ public class MockTransport: Transport {
             mock.sendMessageCalls.append(message)
             completion(.success(()))
         }
+
+        public func startOpenChannelListener(completion: @escaping (Result<Beacon.Peer, Error>) -> ()) {
+            // TODO:
+            completion(.failure(Beacon.Error.unknown))
+        }
+
+        public func getRelayServers(completion: @escaping (Result<([String]), Error>) -> ()) {
+            completion(.success(["beacon-node-1.sky.papers.tech"]))
+        }
     }
 }

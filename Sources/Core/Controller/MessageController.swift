@@ -96,6 +96,16 @@ class MessageController: MessageControllerProtocol {
         
         return (message.origin, versionedMessage)
     }
+
+    func senderIdentifier(publicKey: String, completion: @escaping (Result<String, Swift.Error>) -> ()) {
+        do {
+            let senderHash = try identifierCreator.senderIdentifier(from: try HexString(from: publicKey))
+            completion(.success(senderHash))
+
+        } catch {
+            completion(.failure(error))
+        }
+    }
     
     private func onOutgoing<T: Blockchain>(
         _ message: BeaconMessage<T>,
@@ -163,7 +173,7 @@ class MessageController: MessageControllerProtocol {
             completion(.failure(error))
         }
     }
-    
+
     private func savePendingRequest<T: Blockchain>(_ request: BeaconRequest<T>) {
         pendingRequests[request.id] = request
     }
@@ -200,4 +210,6 @@ public protocol MessageControllerProtocol {
     )
     
     func onOutgoing(_ message: DisconnectBeaconMessage, with beaconID: String) throws -> (Beacon.Origin, VersionedBeaconMessage)
+
+    func senderIdentifier(publicKey: String, completion: @escaping (Result<String, Swift.Error>) -> ())
 }

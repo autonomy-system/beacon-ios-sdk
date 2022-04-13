@@ -16,12 +16,12 @@ public protocol DependencyRegistry {
     
     // MARK: Controller
     
-    func connectionController(configuredWith connections: [Beacon.Connection]) throws -> ConnectionControllerProtocol
+    func connectionController(configuredWith connections: [Beacon.Connection], app: Beacon.Application) throws -> ConnectionControllerProtocol
     var messageController: MessageControllerProtocol { get }
     
     // MARK: Transport
     
-    func transport(configuredWith connection: Beacon.Connection) throws -> Transport
+    func transport(configuredWith connection: Beacon.Connection, app: Beacon.Application) throws -> Transport
     
     // MARK: Coin
     

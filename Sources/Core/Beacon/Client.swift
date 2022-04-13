@@ -89,6 +89,12 @@ extension Beacon {
                 completion(result.withBeaconError())
             }
         }
+
+        public func getRelayServers(completion: @escaping (Result<[String], Error>) -> ()) {
+            connectionController.getRelayServers { result in
+                completion(result.withBeaconError())
+            }
+        }
         
         ///
         /// Adds new peers.

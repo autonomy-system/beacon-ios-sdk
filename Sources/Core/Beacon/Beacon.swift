@@ -10,8 +10,15 @@ import Foundation
 
 public class Beacon {
 
-    public private(set) static var shared: Beacon? = nil
-    
+    public enum ApplicationType {
+        case wallet
+        case dapp
+    }
+
+    public private(set) static var shareds = [ApplicationType: Beacon]()
+    public static var shared: Beacon? { shareds[.wallet] }
+    public static var dappShared: Beacon? { shareds[.dapp] }
+
     public let dependencyRegistry: DependencyRegistry
     public let app: Application
     
@@ -27,6 +34,7 @@ public class Beacon {
     // MARK: Initialization
     
     public static func initialize(
+        appType: ApplicationType,
         appName: String,
         appIcon: String?,
         appURL: String?,
@@ -35,23 +43,24 @@ public class Beacon {
         secureStorage: SecureStorage,
         completion: @escaping (Result<(Beacon), Swift.Error>) -> ()
     ) {
-        if let beacon = shared {
+        if let beacon = shareds[appType] {
             completion(.success(beacon))
             return
         }
         
         let dependencyRegistry = CoreDependencyRegistry(blockchainFactories: blockchainFactories, storage: storage, secureStorage: secureStorage)
-        Beacon.initialize(appName: appName, appIcon: appIcon, appURL: appURL, dependencyRegistry: dependencyRegistry, completion: completion)
+        Beacon.initialize(appType: appType, appName: appName, appIcon: appIcon, appURL: appURL, dependencyRegistry: dependencyRegistry, completion: completion)
     }
     
     static func initialize(
+        appType: ApplicationType,
         appName: String,
         appIcon: String?,
         appURL: String?,
         dependencyRegistry: DependencyRegistry,
         completion: @escaping (Result<(Beacon), Swift.Error>) -> ()
     ) {
-        if let beacon = shared {
+        if let beacon = shareds[appType] {
             completion(.success(beacon))
             return
         }
@@ -70,7 +79,7 @@ public class Beacon {
                     dependencyRegistry: dependencyRegistry,
                     app: Application(keyPair: keyPair, name: appName, icon: appIcon, url: appURL)
                 )
-                shared = beacon
+                shareds[appType] = beacon
                 
                 completion(.success(beacon))
             }
@@ -113,6 +122,46 @@ public class Beacon {
             completion(.failure(error))
         }
     }
+
+    public func openCryptoBox(payload: String, completion: @escaping (Result<[UInt8], Swift.Error>) -> ()) {
+        do {
+            let hexString = try HexString(from: payload)
+
+            let keyPair = app.keyPair
+            let decryptedMessage = try dependencyRegistry.crypto.decrypt(message: hexString, publicKey: keyPair.publicKey, secretKey: keyPair.secretKey)
+            completion(.success(decryptedMessage))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    public func sealCryptoBox(payload: String, publicKey: String, completion: @escaping (Result<String, Swift.Error>) -> ()) {
+        do {
+            let pubicKeyHex = try HexString(from: publicKey).asBytes()
+            let keyPair = app.keyPair
+            let sharedKey = try dependencyRegistry.crypto.clientSessionKeyPair(publicKey: pubicKeyHex, secretKey: keyPair.secretKey)
+
+            let encryptedData = try dependencyRegistry.crypto.encrypt(message: payload, withSharedKey: sharedKey.tx)
+            let hexString = HexString(from: encryptedData)
+            completion(.success(hexString.asString()))
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    public func openCryptoBox(payload: String, publicKey: String, completion: @escaping (Result<[UInt8], Swift.Error>) -> ()) {
+        do {
+            let publicKeyBytes = try HexString(from: publicKey).asBytes()
+            let keyPair = app.keyPair
+            let sharedKey = try dependencyRegistry.crypto.serverSessionKeyPair(publicKey: publicKeyBytes, secretKey: keyPair.secretKey)
+
+            let decryptedData = try dependencyRegistry.crypto.decrypt(message: HexString(from: payload), withSharedKey: sharedKey.rx)
+            completion(.success(decryptedData))
+
+        } catch {
+            completion(.failure(error))
+        }
+    }
 }
 
 // MARK: Extensions
@@ -120,6 +169,6 @@ public class Beacon {
 extension Beacon {
     
     static func reset() {
-        shared = nil
+        shareds = [:]
     }
 }

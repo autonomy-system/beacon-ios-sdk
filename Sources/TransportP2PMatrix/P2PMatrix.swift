@@ -92,7 +92,50 @@ public extension Transport.P2P {
                 }
             }
         }
-        
+
+        public func listenForChannelOpening(newPeerCompletion: @escaping (Result<Beacon.P2PPeer, Swift.Error>) -> ()) {
+            let messageListener = MatrixClient.EventListener { [weak self] event in
+                guard let strongSelf = self else { return }
+
+                switch event {
+                case let .textMessage(content):
+                    guard content.message.contains("@channel-open:") else {
+                        return
+                    }
+
+                    let payload = content.message.split(separator: ":").last ?? ""
+
+                    do {
+                        let payloadHex = try HexString(from: String(payload))
+                        let data = try strongSelf.security.decryptPairingPayload(payloadHex)
+
+                        let decoder = JSONDecoder()
+                        let pairingResponse = try decoder.decode(Transport.P2P.PairingResponse.self, from: Data(data))
+
+                        let peer = pairingResponse.extractP2PPeer()
+                        newPeerCompletion(.success(peer))
+
+                    } catch {
+                        newPeerCompletion(.failure(error))
+                    }
+
+                default:
+                    break
+
+                }
+            }
+
+            self.internalListeners.append(messageListener)
+            self.matrixClient.subscribe(for: .textMessage, with: messageListener)
+
+        }
+
+        public func getRelayServers(completion: @escaping (Result<[String], Swift.Error>) -> ()) {
+            self.matrixClient.getPollerNodes { pollerNodes in
+                completion(.success(pollerNodes))
+            }
+        }
+
         ///
         /// Stops the connection.
         ///
