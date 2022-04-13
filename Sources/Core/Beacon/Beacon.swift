@@ -10,14 +10,7 @@ import Foundation
 
 public class Beacon {
 
-    public enum ApplicationType {
-        case wallet
-        case dapp
-    }
-
-    public private(set) static var shareds = [ApplicationType: Beacon]()
-    public static var shared: Beacon? { shareds[.wallet] }
-    public static var dappShared: Beacon? { shareds[.dapp] }
+    public private(set) static var shared: Beacon? = nil
 
     public let dependencyRegistry: DependencyRegistry
     public let app: Application
@@ -34,7 +27,6 @@ public class Beacon {
     // MARK: Initialization
     
     public static func initialize(
-        appType: ApplicationType,
         appName: String,
         appIcon: String?,
         appURL: String?,
@@ -43,24 +35,23 @@ public class Beacon {
         secureStorage: SecureStorage,
         completion: @escaping (Result<(Beacon), Swift.Error>) -> ()
     ) {
-        if let beacon = shareds[appType] {
+        if let beacon = shared {
             completion(.success(beacon))
             return
         }
         
         let dependencyRegistry = CoreDependencyRegistry(blockchainFactories: blockchainFactories, storage: storage, secureStorage: secureStorage)
-        Beacon.initialize(appType: appType, appName: appName, appIcon: appIcon, appURL: appURL, dependencyRegistry: dependencyRegistry, completion: completion)
+        Beacon.initialize(appName: appName, appIcon: appIcon, appURL: appURL, dependencyRegistry: dependencyRegistry, completion: completion)
     }
     
     static func initialize(
-        appType: ApplicationType,
         appName: String,
         appIcon: String?,
         appURL: String?,
         dependencyRegistry: DependencyRegistry,
         completion: @escaping (Result<(Beacon), Swift.Error>) -> ()
     ) {
-        if let beacon = shareds[appType] {
+        if let beacon = shared {
             completion(.success(beacon))
             return
         }
@@ -79,7 +70,7 @@ public class Beacon {
                     dependencyRegistry: dependencyRegistry,
                     app: Application(keyPair: keyPair, name: appName, icon: appIcon, url: appURL)
                 )
-                shareds[appType] = beacon
+                shared = beacon
                 
                 completion(.success(beacon))
             }
@@ -169,6 +160,6 @@ public class Beacon {
 extension Beacon {
     
     static func reset() {
-        shareds = [:]
+        shared = nil
     }
 }
