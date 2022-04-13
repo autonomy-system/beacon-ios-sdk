@@ -12,9 +12,9 @@ protocol ExtendedDependencyRegistry: DependencyRegistry {
     
     // MARK: P2P
 
-    func p2pMatrixCommunicator(app: Beacon.Application) throws -> Transport.P2P.Matrix.Communicator
-    func p2pMatrixSecurity(app: Beacon.Application) throws -> Transport.P2P.Matrix.Security
-    func p2pMatrixStore(app: Beacon.Application, communicator: Transport.P2P.Matrix.Communicator, urlSession: URLSession, matrixNodes: [String]) throws -> Transport.P2P.Matrix.Store
+    func p2pMatrixCommunicator() throws -> Transport.P2P.Matrix.Communicator
+    func p2pMatrixSecurity() throws -> Transport.P2P.Matrix.Security
+    func p2pMatrixStore(urlSession: URLSession, matrixNodes: [String]) throws -> Transport.P2P.Matrix.Store
 
     // MARK: Matrix
 
@@ -23,8 +23,11 @@ protocol ExtendedDependencyRegistry: DependencyRegistry {
 
 extension DependencyRegistry {
     func extend() -> ExtendedDependencyRegistry {
-        guard let extended = self as? ExtendedDependencyRegistry else {
-            return P2PMatrixDependencyRegistry(dependencyRegistry: self)
+        guard let extended = (self as? P2PMatrixDependencyRegistry) ?? findExtended() else {
+            let extended = P2PMatrixDependencyRegistry(dependencyRegistry: self)
+            addExtended(extended)
+            
+            return extended
         }
         
         return extended

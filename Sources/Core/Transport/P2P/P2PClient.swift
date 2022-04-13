@@ -31,5 +31,5 @@ public protocol P2PClient {
 }
 
 public protocol P2PClientFactory {
-    func create(with dependencyRegistry: DependencyRegistry, app: Beacon.Application) throws -> P2PClient
+    func create(with dependencyRegistry: DependencyRegistry) throws -> P2PClient
 }
