@@ -59,6 +59,12 @@ public struct PermissionV3TezosRequest: PermissionV3BeaconRequestContentDataProt
             self.name = appMetadata.name
             self.icon = appMetadata.icon
         }
+
+        public init(from appMetadata: AnyAppMetadata) {
+            self.senderID = appMetadata.senderID
+            self.name = appMetadata.name
+            self.icon = appMetadata.icon
+        }
         
         func toAppMetadata() -> Tezos.AppMetadata {
             Tezos.AppMetadata(senderID: senderID, name: name, icon: icon)

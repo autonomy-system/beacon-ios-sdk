@@ -48,6 +48,13 @@ public struct AcknowledgeV2BeaconResponse<BlockchainType: Blockchain>: V2BeaconM
         let message = AcknowledgeBeaconResponse(id: id, version: version, requestOrigin: origin)
         completion(.success(.response(.acknowledge(message))))
     }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case version
+        case id
+        case senderID = "senderId"
+    }
 }
 
 // MARK: Extensions

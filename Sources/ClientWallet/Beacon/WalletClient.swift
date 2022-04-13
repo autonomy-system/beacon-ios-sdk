@@ -102,8 +102,8 @@ extension Beacon {
             }
         }
         
-        public func request<T: Blockchain>(with request: BeaconRequest<T>, completion: @escaping (_ result: Result<(), Error>) -> ()) {
-            send(.request(request), terminalMessage: true, completion: completion)
+        public func request<T: Blockchain>(with message: BeaconMessage<T>, completion: @escaping (_ result: Result<(), Error>) -> ()) {
+            send(message, terminalMessage: true, completion: completion)
         }
         
         public func getOwnAppMetadata(completion: @escaping (Result<AnyAppMetadata, Error>) -> ()) {

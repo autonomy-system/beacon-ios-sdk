@@ -18,7 +18,7 @@ public struct PermissionV2TezosRequest: V2BeaconMessageProtocol {
     public let network: Tezos.Network
     public let scopes: [Tezos.Permission.Scope]
     
-    init(
+    public init(
         version: String,
         id: String,
         senderID: String,
@@ -101,6 +101,12 @@ public struct PermissionV2TezosRequest: V2BeaconMessageProtocol {
         public let icon: String?
         
         init(from appMetadata: Tezos.AppMetadata) {
+            self.senderID = appMetadata.senderID
+            self.name = appMetadata.name
+            self.icon = appMetadata.icon
+        }
+
+        public init(from appMetadata: AnyAppMetadata) {
             self.senderID = appMetadata.senderID
             self.name = appMetadata.name
             self.icon = appMetadata.icon
