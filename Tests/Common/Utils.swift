@@ -20,7 +20,7 @@ public func initBeacon(
     dependencyRegistry: DependencyRegistry = MockDependencyRegistry(),
     completion: @escaping (Result<Beacon, Swift.Error>) -> () = { _ in }
 ) {
-    Beacon.initialize(appType: .wallet, appName: appName, appIcon: appIcon, appURL: appURL, dependencyRegistry: dependencyRegistry, completion: completion)
+    Beacon.initialize(appName: appName, appIcon: appIcon, appURL: appURL, dependencyRegistry: dependencyRegistry, completion: completion)
 }
 
 public func clearBeacon() {
