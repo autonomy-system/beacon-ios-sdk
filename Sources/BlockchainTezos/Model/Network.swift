@@ -64,6 +64,7 @@ extension Tezos {
             case hangzhounet
             case ithacanet
             case custom
+            case kathmandunet
         }
     }
 }
