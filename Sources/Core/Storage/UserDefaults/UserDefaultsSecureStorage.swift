@@ -13,9 +13,11 @@ import LocalAuthentication
 public struct UserDefaultsSecureStorage: SecureStorage {
     
     private let userDefaults: UserDefaults
+    private let accessGroup: String?
     
-    public init(userDefaults: UserDefaults = .standard) {
+    public init(userDefaults: UserDefaults = .standard, accessGroup: String? = nil) {
         self.userDefaults = userDefaults
+        self.accessGroup = accessGroup
     }
     
     public func getSDKSecretSeed(completion: @escaping (Result<String?, Swift.Error>) -> ()) {
@@ -75,7 +77,7 @@ public struct UserDefaultsSecureStorage: SecureStorage {
             throw Error.dataConversionFailure
         }
         let encryptedData = try secretKey.encrypt(data: messageData)
-        let item = Keychain.Password(data: encryptedData, account: key.rawValue, protection: .whenUnlockedThisDeviceOnly)
+        let item = Keychain.Password(data: encryptedData, account: key.rawValue, protection: .whenUnlockedThisDeviceOnly, accessGroup: accessGroup)
         try item.save()
     }
 
