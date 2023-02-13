@@ -93,7 +93,7 @@ public class Beacon {
         completion: @escaping (Result<KeyPair, Swift.Error>) -> ()
     ) {
         storageManager.getSDKSecretSeed { result in
-            guard let storageSeed = result.get(ifFailure: completion) else { return }
+            let storageSeed = try? result.get()
             
             if let seed = storageSeed {
                 completion(runCatching { try crypto.keyPairFrom(seed: seed) })
