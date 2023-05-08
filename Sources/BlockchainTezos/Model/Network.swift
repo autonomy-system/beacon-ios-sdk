@@ -65,6 +65,7 @@ extension Tezos {
             case ithacanet
             case custom
             case kathmandunet
+            case ghostnet
         }
     }
 }
