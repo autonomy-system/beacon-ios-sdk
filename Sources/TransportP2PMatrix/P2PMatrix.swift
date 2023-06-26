@@ -126,7 +126,7 @@ public extension Transport.P2P {
                 }
             }
 
-            self.internalListeners.append(messageListener)
+            self.internalListeners.insert(messageListener)
             self.matrixClient.subscribe(for: .textMessage, with: messageListener)
 
         }

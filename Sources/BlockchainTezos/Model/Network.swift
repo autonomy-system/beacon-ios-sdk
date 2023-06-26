@@ -98,8 +98,6 @@ extension Tezos {
             case mumbainet
             
             case custom
-            case kathmandunet
-            case ghostnet
         }
     }
 }
