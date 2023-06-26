@@ -16,7 +16,7 @@ public struct SignPayloadV1TezosResponse: V1BeaconMessageProtocol {
     public let beaconID: String
     public let signature: String
     
-    init(version: String, id: String, beaconID: String, signature: String) {
+    init(version: String = V1BeaconMessage<Tezos>.version, id: String, beaconID: String, signature: String) {
         type = SignPayloadV1TezosResponse.type
         self.version = version
         self.id = id
@@ -50,7 +50,8 @@ public struct SignPayloadV1TezosResponse: V1BeaconMessageProtocol {
     }
     
     public func toBeaconMessage(
-        with origin: Beacon.Origin,
+        withOrigin origin: Beacon.Connection.ID,
+        andDestination destination: Beacon.Connection.ID,
         completion: @escaping (Result<BeaconMessage<Tezos>, Swift.Error>) -> ()
     ) {
         completion(.success(.response(
@@ -59,7 +60,7 @@ public struct SignPayloadV1TezosResponse: V1BeaconMessageProtocol {
                     .init(
                         id: id,
                         version: version,
-                        requestOrigin: origin,
+                        destination: destination,
                         signingType: .raw,
                         signature: signature
                     )

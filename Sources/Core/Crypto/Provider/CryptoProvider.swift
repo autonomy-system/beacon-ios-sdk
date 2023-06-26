@@ -24,6 +24,7 @@ protocol CryptoProvider {
     func validate(encrypted: String) -> Bool
     func encrypt(message: [UInt8], withPublicKey key: [UInt8]) throws -> [UInt8]
     func decrypt(message: [UInt8], publicKey: [UInt8], secretKey: [UInt8]) throws -> [UInt8]
+    func decrypt(message: [UInt8], withPublicKey publicKey: [UInt8], andSecretKey: [UInt8]) throws -> [UInt8]
     func encrypt(message: [UInt8], withSharedKey key: [UInt8]) throws -> [UInt8]
     func decrypt(message: [UInt8], withSharedKey key: [UInt8]) throws -> [UInt8]
 }

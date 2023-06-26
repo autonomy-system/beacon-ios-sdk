@@ -14,7 +14,9 @@ public extension Beacon {
         
         // MARK: SDK
         
-        public static let sdkVersion: String = "3.0.0"
+        public static let sdkVersion: String = "3.2.1"
+        
+        public static let beaconVersion: String = "3"
         
         static let cryptoProvider: CryptoProvider = .sodium
         static let serializer: Serializer = .base58check

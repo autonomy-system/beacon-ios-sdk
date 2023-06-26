@@ -12,9 +12,9 @@ public struct AcknowledgeV2BeaconResponse<BlockchainType: Blockchain>: V2BeaconM
     public let type: String
     public let version: String
     public let id: String
-    public let senderID: String
+    public let senderID: String?
     
-    public init(version: String, id: String, senderID: String) {
+    public init(version: String = V2BeaconMessage<BlockchainType>.version, id: String, senderID: String? = nil) {
         self.type = AcknowledgeV2BeaconResponse.type
         self.version = version
         self.id = id
@@ -42,10 +42,11 @@ public struct AcknowledgeV2BeaconResponse<BlockchainType: Blockchain>: V2BeaconM
     }
     
     public func toBeaconMessage(
-        with origin: Beacon.Origin,
+        withOrigin origin: Beacon.Connection.ID,
+        andDestination destination: Beacon.Connection.ID,
         completion: @escaping (Result<BeaconMessage<BlockchainType>, Swift.Error>) -> ()
     ) {
-        let message = AcknowledgeBeaconResponse(id: id, version: version, requestOrigin: origin)
+        let message = AcknowledgeBeaconResponse(id: id, version: version, destination: destination)
         completion(.success(.response(.acknowledge(message))))
     }
 

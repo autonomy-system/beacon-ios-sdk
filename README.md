@@ -33,7 +33,7 @@ https://github.com/airgap-it/beacon-ios-sdk
 Add the following dependency in your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/airgap-it/beacon-ios-sdk", from: "3.1.2")
+.package(url: "https://github.com/airgap-it/beacon-ios-sdk", from: "3.2.1")
 ```
 
 ### CocoaPods
@@ -44,18 +44,21 @@ To add `Beacon iOS SDK` using [CocoaPods](https://cocoapods.org/), add the `Beac
 target 'MyTarget' do
     use_frameworks!
     
-    pod 'BeaconCore', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.1.2'
+    pod 'BeaconCore', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.2.1'
+    
+    // optional
+    pod 'BeaconClientDApp', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.2.1'
 
     // optional
-    pod 'BeaconClientWallet', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.1.2'
+    pod 'BeaconClientWallet', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.2.1'
 
     // optional
-    pod 'BeaconBlockchainSubstrate', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.1.2'
+    pod 'BeaconBlockchainSubstrate', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.2.1'
     // optional
-    pod 'BeaconBlockchainTezos', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.1.2'
+    pod 'BeaconBlockchainTezos', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.2.1'
 
     // optional
-    pod 'BeaconTransportP2PMatrix', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.1.2'
+    pod 'BeaconTransportP2PMatrix', :git => 'https://github.com/airgap-it/beacon-ios-sdk', :tag => '3.2.1'
 end
 ```
 
@@ -81,6 +84,7 @@ Client packages ship with Beacon implementations for different parts of the netw
 
 | Module               | Description                       | Dependencies | Required by |
 | -------------------- | --------------------------------- | ------------ | ----------- |
+| `BeaconClientDApp`   | Beacon implementation for dApps   | `BeaconCore` | ✖️          |
 | `BeaconClientWallet` | Beacon implementation for wallets | `BeaconCore` | ✖️          |
 
 ### Blockchain
@@ -114,7 +118,7 @@ The snippets below show how to quickly setup listening for incoming Beacon messa
 
 For more examples please see our `demo` app (WIP).
 
-### Create a Beacon client and listen for incoming messages
+### Create a Beacon wallet client and listen for incoming messages
 
 ```swift
 import BeaconCore
@@ -261,6 +265,12 @@ beaconClient.respond(with: BeaconResponse<Tezos>.error(errorResponse)) { /* ... 
 ---
 ## Related Projects
 
-[Beacon SDK](https://github.com/airgap-it/beacon-sdk) - an SDK for web developers (dApp & wallet)
+### AirGap Projects
 
-[Beacon Android SDK](https://github.com/airgap-it/beacon-android-sdk) - an SDK for Android developers (wallet)
+[Beacon SDK](https://github.com/airgap-it/beacon-sdk) - an SDK for web developers
+
+[Beacon Android SDK](https://github.com/airgap-it/beacon-android-sdk) - an SDK for Android developers
+
+### Community Projects
+
+[Beacon Flutter SDK](https://github.com/TalaoDAO/beacon) - an SDK for Flutter developers

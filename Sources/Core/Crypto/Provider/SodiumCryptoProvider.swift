@@ -132,7 +132,17 @@ class SodiumCryptoProvider: CryptoProvider {
 
         return result.reversed().drop(while: { $0 == 0 }).reversed()
     }
-
+    
+    func decrypt(message: [UInt8], withPublicKey publicKey: [UInt8], andSecretKey secretKey: [UInt8]) throws -> [UInt8] {
+        var result = [UInt8](repeating: 0, count: message.count - crypto_box_sealbytes())
+        let status = crypto_box_seal_open(&result, message, UInt64(message.count), publicKey, secretKey)
+        guard status == 0 else {
+            throw Error.sodium(Int(status))
+        }
+        
+        return result
+    }
+    
     func encrypt(message: [UInt8], withSharedKey key: [UInt8]) throws -> [UInt8] {
         let nonce = try randomBytes(length: crypto_box_noncebytes())
         var result = [UInt8](repeating: 0, count: message.count + crypto_box_macbytes())

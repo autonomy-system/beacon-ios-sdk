@@ -8,12 +8,14 @@
 import Foundation
 
 public struct V3BeaconMessage<BlockchainType: Blockchain>: V3BeaconMessageProtocol {
+    public static var version: String { "3" }
+    
     public var id: String
     public var version: String
     public var senderID: String
     public var message: Content
     
-    public init(id: String, version: String, senderID: String, message: Content) {
+    public init(id: String, version: String = Self.version, senderID: String, message: Content) {
         self.id = id
         self.version = version
         self.senderID = senderID
@@ -38,10 +40,11 @@ public struct V3BeaconMessage<BlockchainType: Blockchain>: V3BeaconMessageProtoc
     
     
     public func toBeaconMessage(
-        with origin: Beacon.Origin,
+        withOrigin origin: Beacon.Connection.ID,
+        andDestination destination: Beacon.Connection.ID,
         completion: @escaping (Result<BeaconMessage<BlockchainType>, Error>) -> ()
     ) {
-        message.toBeaconMessage(id: id, version: version, senderID: senderID, origin: origin, completion: completion)
+        message.toBeaconMessage(id: id, version: version, senderID: senderID, origin: origin, destination: destination, completion: completion)
     }
     
     // MARK: Types

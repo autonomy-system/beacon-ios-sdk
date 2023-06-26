@@ -19,6 +19,13 @@ public protocol P2PClient {
     func listenForChannelOpening(newPeerCompletion: @escaping (Result<Beacon.P2PPeer, Error>) -> ())
     func getRelayServers(completion: @escaping (Result<[String], Error>) -> ())
     
+    // MARK: Pairing
+    
+    func createPairingRequest(completion: @escaping (Result<(Transport.P2P.PairingRequest), Swift.Error>) -> ())
+    func createPairingResponse(from request: Transport.P2P.PairingRequest, completion: @escaping (Result<(Transport.P2P.PairingResponse), Swift.Error>) -> ())
+    
+    func listenForPairingResponse(withID id: String, listener: @escaping (Result<Transport.P2P.PairingResponse, Swift.Error>) -> ())
+    
     // MARK: Incoming Messages
     
     func listen(to peer: Beacon.P2PPeer, listener: @escaping (Result<String, Swift.Error>) -> ()) throws

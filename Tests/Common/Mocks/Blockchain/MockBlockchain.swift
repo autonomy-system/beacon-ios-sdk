@@ -51,7 +51,23 @@ public struct MockBlockchainCreator: BlockchainCreator {
     
     public init() {}
     
-    public func extractPermission(
+    public func extractIncomingPermission(
+        from request: MockRequest.Permission,
+        and response: MockResponse.Permission,
+        withOrigin origin: Beacon.Connection.ID,
+        completion: @escaping (Result<[AnyPermission], Error>
+    ) -> ()) {
+        let permissions = response.accountIDs.map {
+            AnyPermission(
+                accountID: $0,
+                senderID: request.senderID,
+                connectedAt: 0
+            )
+        }
+        completion(.success(permissions))
+    }
+    
+    public func extractOutgoingPermission(
         from request: BlockchainType.Request.Permission,
         and response: BlockchainType.Response.Permission,
         completion: @escaping (Result<[BlockchainType.Permission], Error>) -> ()
@@ -64,6 +80,13 @@ public struct MockBlockchainCreator: BlockchainCreator {
             )
         }
         completion(.success(permissions))
+    }
+    
+    public func extractAccounts(from response: MockResponse.Permission, completion: @escaping (Result<[Account], Error>) -> ()) {
+        let accounts: [Account] = response.accountIDs.map {
+            .init(accountID: $0, address: "address")
+        }
+        completion(.success(accounts))
     }
 }
 
@@ -92,7 +115,8 @@ public struct MockRequest: BlockchainRequest {
         public var blockchainIdentifier: String
         public var senderID: String
         public var appMetadata: AppMetadata
-        public var origin: Beacon.Origin
+        public var origin: Beacon.Connection.ID
+        public var destination: Beacon.Connection.ID
     }
     
     public struct Blockchain: BlockchainBeaconRequestProtocol & Equatable & Codable {
@@ -100,7 +124,8 @@ public struct MockRequest: BlockchainRequest {
         public var version: String
         public var blockchainIdentifier: String
         public var senderID: String
-        public var origin: Beacon.Origin
+        public var origin: Beacon.Connection.ID
+        public var destination: Beacon.Connection.ID
         public var accountID: String?
     }
 }
@@ -109,14 +134,14 @@ public struct MockResponse: BlockchainResponse {
     public struct Permission: PermissionBeaconResponseProtocol & Equatable & Codable {
         public var id: String
         public var version: String
-        public var requestOrigin: Beacon.Origin
+        public var destination: Beacon.Connection.ID
         public var accountIDs: [String]
     }
     
     public struct Blockchain: BlockchainBeaconResponseProtocol & Equatable & Codable {
         public var id: String
         public var version: String
-        public var requestOrigin: Beacon.Origin
+        public var destination: Beacon.Connection.ID
     }
 }
 
@@ -174,12 +199,13 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
         }
         
         public func toBeaconMessage(
-            with origin: Beacon.Origin,
+            withOrigin origin: Beacon.Connection.ID,
+            andDestination destination: Beacon.Connection.ID,
             completion: @escaping (Result<BeaconMessage<MockBlockchain>, Error>) -> ()
         ) {
             do {
                 guard let content = content else {
-                    throw Beacon.Error.unknown
+                    throw Beacon.Error.unknown()
                 }
                 
                 let mockMessage: BeaconMessage<MockBlockchain> = try {
@@ -201,7 +227,7 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
                     case "disconnect":
                         return .disconnect(try decoder.decode(DisconnectBeaconMessage.self, from: Data(content.utf8)))
                     default:
-                        throw Beacon.Error.unknown
+                        throw Beacon.Error.unknown()
                     }
                 }()
                 
@@ -263,12 +289,13 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
         }
         
         public func toBeaconMessage(
-            with origin: Beacon.Origin,
+            withOrigin origin: Beacon.Connection.ID,
+            andDestination destination: Beacon.Connection.ID,
             completion: @escaping (Result<BeaconMessage<MockBlockchain>, Error>) -> ()
         ) {
             do {
                 guard let content = content else {
-                    throw Beacon.Error.unknown
+                    throw Beacon.Error.unknown()
                 }
                 
                 let mockMessage: BeaconMessage<MockBlockchain> = try {
@@ -290,7 +317,7 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
                     case "disconnect":
                         return .disconnect(try decoder.decode(DisconnectBeaconMessage.self, from: Data(content.utf8)))
                     default:
-                        throw Beacon.Error.unknown
+                        throw Beacon.Error.unknown()
                     }
                 }()
                 
@@ -318,12 +345,13 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
                 id: String,
                 version: String,
                 senderID: String,
-                origin: Beacon.Origin,
+                origin: Beacon.Connection.ID,
+                destination: Beacon.Connection.ID,
                 completion: @escaping (Result<BeaconMessage<MockBlockchain>, Error>) -> ()
             ) {
                 do {
                     guard let content = content else {
-                        throw Beacon.Error.unknown
+                        throw Beacon.Error.unknown()
                     }
                     
                     let mockMessage: BeaconMessage<MockBlockchain> = try {
@@ -354,13 +382,14 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
                 id: String,
                 version: String,
                 senderID: String,
-                origin: Beacon.Origin,
+                origin: Beacon.Connection.ID,
+                destination: Beacon.Connection.ID,
                 accountID: String,
                 completion: @escaping (Result<BeaconMessage<MockBlockchain>, Error>) -> ()
             ) {
                 do {
                     guard let content = content else {
-                        throw Beacon.Error.unknown
+                        throw Beacon.Error.unknown()
                     }
                     
                     let mockMessage: BeaconMessage<MockBlockchain> = try {
@@ -391,12 +420,13 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
                 id: String,
                 version: String,
                 senderID: String,
-                origin: Beacon.Origin,
+                origin: Beacon.Connection.ID,
+                destination: Beacon.Connection.ID,
                 completion: @escaping (Result<BeaconMessage<MockBlockchain>, Error>) -> ()
             ) {
                 do {
                     guard let content = content else {
-                        throw Beacon.Error.unknown
+                        throw Beacon.Error.unknown()
                     }
                     
                     let mockMessage: BeaconMessage<MockBlockchain> = try {
@@ -427,12 +457,13 @@ public struct MockVersionedMessage: BlockchainVersionedMessage {
                 id: String,
                 version: String,
                 senderID: String,
-                origin: Beacon.Origin,
+                origin: Beacon.Connection.ID,
+                destination: Beacon.Connection.ID,
                 completion: @escaping (Result<BeaconMessage<MockBlockchain>, Error>) -> ()
             ) {
                 do {
                     guard let content = content else {
-                        throw Beacon.Error.unknown
+                        throw Beacon.Error.unknown()
                     }
                     
                     let mockMessage: BeaconMessage<MockBlockchain> = try {

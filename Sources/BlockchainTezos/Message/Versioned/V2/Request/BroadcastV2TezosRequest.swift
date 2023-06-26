@@ -17,7 +17,7 @@ public struct BroadcastV2TezosRequest: V2BeaconMessageProtocol {
     public let network: Tezos.Network
     public let signedTransaction: String
     
-    init(version: String, id: String, senderID: String, network: Tezos.Network, signedTransaction: String) {
+    init(version: String = V2BeaconMessage<Tezos>.version, id: String, senderID: String, network: Tezos.Network, signedTransaction: String) {
         type = BroadcastV2TezosRequest.type
         self.version = version
         self.id = id
@@ -58,7 +58,8 @@ public struct BroadcastV2TezosRequest: V2BeaconMessageProtocol {
     }
     
     public func toBeaconMessage(
-        with origin: Beacon.Origin,
+        withOrigin origin: Beacon.Connection.ID,
+        andDestination destination: Beacon.Connection.ID,
         completion: @escaping (Result<BeaconMessage<Tezos>, Swift.Error>) -> ()
     ) {
         runCatching(completion: completion) {
@@ -73,6 +74,7 @@ public struct BroadcastV2TezosRequest: V2BeaconMessageProtocol {
                                         senderID: senderID,
                                         appMetadata: appMetadata,
                                         origin: origin,
+                                        destination: destination,
                                         accountID: nil,
                                         network: network,
                                         signedTransaction: signedTransaction
